@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Weather Project</title>
     <link rel="stylesheet" href="style.css">
-    <meta name="wiewport" content="width=devicewidth, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -16,12 +16,21 @@
             <button class="search-btn">Search</button>
             <div class="separator"></div>
             <button class="location-btn">Use Current Location</button>
+            
+            <div class="temp-toggle"> 
+                <label for="unit-toggle">Temperature Unit:</label>
+                <select id="unit-toggle">
+                    <option value="C">Celsius</option>
+                    <option value="F">Fahrenheit</option>
+                </select>
+            </div>
         </div>
+
         <div class="weather-data">
             <div class="current-weather">
                 <div class="details">
                     <h2>___ ( ___ )</h2>
-                    <h4>Temp: ___ Celcius</h4>
+                    <h4>Temp: ___ °<span class="unit-display">C</span></h4>
                     <h4>Wind: ___ M/S</h4>
                     <h4>Humidity: ___ %</h4>
                 </div>
@@ -31,31 +40,31 @@
                 <ul class="weather-cards">
                     <li class="card">
                         <h3>( ___ )</h3>
-                        <h4>Temp: ___ Celcius</h4>
+                        <h4>Temp: ___ °<span class="unit-display">C</span></h4>
                         <h4>Wind: ___ M/S</h4>
                         <h4>Humidity: ___ %</h4>
                     </li>
                     <li class="card">
                         <h3>( ___ )</h3>
-                        <h4>Temp: ___ Celcius</h4>
+                        <h4>Temp: ___ °<span class="unit-display">C</span></h4>
                         <h4>Wind: ___ M/S</h4>
                         <h4>Humidity: ___ %</h4>
                     </li>
                     <li class="card">
                         <h3>( ___ )</h3>
-                        <h4>Temp: ___ Celcius</h4>
+                        <h4>Temp: ___ °<span class="unit-display">C</span></h4>
                         <h4>Wind: ___ M/S</h4>
                         <h4>Humidity: ___ %</h4>
                     </li>
                     <li class="card">
                         <h3>( ___ )</h3>
-                        <h4>Temp: ___ Celcius</h4>
+                        <h4>Temp: ___ °<span class="unit-display">C</span></h4>
                         <h4>Wind: ___ M/S</h4>
                         <h4>Humidity: ___ %</h4>
                     </li>
                     <li class="card">
                         <h3>( ___ )</h3>
-                        <h4>Temp: ___ Celcius</h4>
+                        <h4>Temp: ___ °<span class="unit-display">C</span></h4>
                         <h4>Wind: ___ M/S</h4>
                         <h4>Humidity: ___ %</h4>
                     </li>
@@ -63,6 +72,5 @@
             </div>
         </div>
     </div>
-
 </body>
 </html>
