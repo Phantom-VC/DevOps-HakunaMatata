@@ -1,0 +1,36 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main           
+      - marcelino      
+      - Mario          
+      - calvin         
+  pull_request:
+    branches:
+      - main           
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Pull image dari Docker Hub
+      - name: Pull Docker image from Docker Hub
+        run: docker pull marcelino30/weatherwebproject:latest
+
+      # 3. Jalankan container menggunakan image yang sudah di-pull
+      - name: Run Docker container
+        run: |
+          docker run -d -p 8080:80 --name weatherwebcontainer marcelino30/weatherwebproject:latest
+          sleep 10  # Tunggu container siap
+
+      # 4. Verifikasi container berjalan dengan Nginx
+      - name: Verify Nginx is running
+        run: |
+          curl -I http://localhost:8080 | grep "200 OK"
