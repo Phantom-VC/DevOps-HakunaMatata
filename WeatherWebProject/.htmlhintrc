@@ -1,0 +1,10 @@
+{
+    "tagname-lowercase": true,
+    "attr-lowercase": true,
+    "doctype-first": true,
+    "spec-char-escape": true,
+    "id-class-value": "dash",
+    "inline-style-disabled": true,
+    "meta-charset": true,
+    "meta-viewport": true
+}

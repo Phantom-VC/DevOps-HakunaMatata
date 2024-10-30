@@ -1,102 +1,155 @@
-const cityInput = document.querySelector(".city-input"); 
-const searchButton = document.querySelector(".search-btn"); 
-const locationButton = document.querySelector(".location-btn"); 
-const currentWeatherDiv = document.querySelector(".current-weather"); 
-const weatherCardDiv = document.querySelector(".weather-cards"); 
+const cityInput = document.querySelector(".city-input");
+const searchButton = document.querySelector(".search-btn");
+const locationButton = document.querySelector(".location-btn");
+const currentWeatherDiv = document.querySelector(".current-weather");
+const weatherCardDiv = document.querySelector(".weather-cards");
+const unitToggle = document.getElementById("unit-toggle");
+const unitDisplayElements = document.querySelectorAll(".unit-display");
 
-const API_KEY = "160299b39523401281b9790f83de3617"; //API key for OpenWeatherMap API
+const API_KEY = "160299b39523401281b9790f83de3617";
+let currentUnit = "C";
 
-const createWeatherCard = (cityName, weatherItem, index) => {
-    if(index === 0) { //HTML for the main weather card
-        return `<div class="details">
-                    <h2>${cityName} (${weatherItem.dt_txt.split(" ")[0]})</h2>
-                    <h4>Temperature: ${(weatherItem.main.temp - 273.15).toFixed(2)} Celcius</h4>
-                    <h4>Wind: ${weatherItem.wind.speed} M/S</h4>
-                    <h4>Humidity: ${weatherItem.main.humidity} %</h4>
-                </div>
-                <div class="icon">
-                    <img src="https://openweathermap.org/img/wn/${weatherItem.weather[0].icon}@4x.png" alt="weather-icon">
-                    <h4>${weatherItem.weather[0].description}</h4>
-                </div>`;
-    } else { //HTML for the other five day forecast card
-        return `<li class="card">
-                    <h3>(${weatherItem.dt_txt.split(" ")[0]})</h3>
-                    <img src="https://openweathermap.org/img/wn/${weatherItem.weather[0].icon}@2x.png" alt="weather-icon">
-                    <h4>Temp: ${(weatherItem.main.temp - 273.15).toFixed(2)} C</h4>
-                    <h4>Wind: ${weatherItem.wind.speed} M/S</h4>
-                    <h4>Humidity: ${weatherItem.main.humidity} %</h4>
-                </li>`;
+// Fungsi untuk mengonversi suhu berdasarkan satuan yang dipilih
+const convertTemperature = (tempK) => {
+    if (currentUnit === "C") {
+        return (tempK - 273.15).toFixed(2); // Konversi ke Celsius
+    } else {
+        return ((tempK - 273.15) * 9/5 + 32).toFixed(2); // Konversi ke Fahrenheit
     }
-}
+};
 
-const getWeatherDetails = (cityName, lat, lon) => {
-    const WEATHER_API_URL = `http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}`; 
+// Fungsi untuk membuat kartu cuaca berdasarkan indeks
+const createWeatherCard = (cityName, weatherItem, isMainCard) => {
+    const date = weatherItem.dt_txt.split(" ")[0];
+    const temp = convertTemperature(weatherItem.main.temp);
+    const iconUrl = `https://openweathermap.org/img/wn/${weatherItem.weather[0].icon}@${isMainCard ? 4 : 2}x.png`;
+    const description = weatherItem.weather[0].description;
+    const windSpeed = weatherItem.wind.speed;
+    const humidity = weatherItem.main.humidity;
 
-    fetch(WEATHER_API_URL).then(res => res.json()).then(data => {
-        // filter the forecasts to get only one forecast per day
-        const uniqueForecastDays = [];
-        const fiveDaysForecast = data.list.filter(forecast => {
-            const forecastDate = new Date(forecast.dt_txt).getDate();
-            if(!uniqueForecastDays.includes(forecastDate)) {
-                return uniqueForecastDays.push(forecastDate);
-            }
-        });
+    return isMainCard ? `
+        <div class="details">
+            <h2>${cityName} (${date})</h2>
+            <h4>Temperature: ${temp} °<span class="unit-display">${currentUnit}</span></h4>
+            <h4>Wind: ${windSpeed} m/s</h4>
+            <h4>Humidity: ${humidity}%</h4>
+        </div>
+        <div class="icon">
+            <img src="${iconUrl}" alt="weather-icon">
+            <h4>${description}</h4>
+        </div>` 
+    : `
+        <li class="card">
+            <h3>${date}</h3>
+            <img src="${iconUrl}" alt="weather-icon">
+            <h4>Temp: ${temp} °<span class="unit-display">${currentUnit}</span></h4>
+            <h4>Wind: ${windSpeed} m/s</h4>
+            <h4>Humidity: ${humidity}%</h4>
+        </li>`;
+};
 
-        // clearing previous weather data
-        cityInput.value = "";
-        currentWeatherDiv.innerHTML = "";
-        weatherCardDiv.innerHTML = "";
+// Fungsi untuk mengatur data cuaca di DOM
+const displayWeatherData = (cityName, forecastData) => {
+    currentWeatherDiv.innerHTML = "";
+    weatherCardDiv.innerHTML = "";
 
-        // creating weather cards and adding them to the DOM
-        fiveDaysForecast.forEach((weatherItem, index) => {
-            if(index === 0) {
-                currentWeatherDiv.insertAdjacentHTML("beforeend", createWeatherCard(cityName, weatherItem, index));
-            } else {
-                weatherCardDiv.insertAdjacentHTML("beforeend", createWeatherCard(cityName, weatherItem, index));
-            }
-        });
-    }).catch(() => {
-        alert("An error occured while fetching the weather forecast!");
+    forecastData.forEach((weatherItem, index) => {
+        const weatherCard = createWeatherCard(cityName, weatherItem, index === 0);
+        if (index === 0) {
+            currentWeatherDiv.insertAdjacentHTML("beforeend", weatherCard);
+        } else {
+            weatherCardDiv.insertAdjacentHTML("beforeend", weatherCard);
+        }
     });
-}
+};
 
-const getCityCoordinates = () => {
-    const cityName = cityInput.value.trim(); //get user entered city name and remove extra space
-    if (!cityName) return; //return cityname is empty
-    const GEOCODING_API_URL = `http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`;
-    
-    // get entered city coordinates (latitude, longtitude, and name) from the API response
-    fetch(GEOCODING_API_URL).then(res => res.json()).then(data => {
-        if(!data.length) return alert(`No coordinates found for ${cityName}`); 
+// Fungsi untuk mengambil dan menampilkan detail cuaca
+const getWeatherDetails = async (cityName, lat, lon) => {
+    try {
+        const response = await fetch(`http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}`);
+        const data = await response.json();
+
+        const uniqueDays = [];
+        const fiveDaysForecast = data.list.filter((forecast) => {
+            const forecastDate = new Date(forecast.dt_txt).getDate();
+            if (!uniqueDays.includes(forecastDate)) {
+                uniqueDays.push(forecastDate);
+                return true;
+            }
+            return false;
+        });
+
+        displayWeatherData(cityName, fiveDaysForecast);
+    } catch (error) {
+        alert("An error occurred while fetching the weather forecast!");
+        console.error(error);
+    }
+};
+
+// Fungsi untuk mendapatkan koordinat berdasarkan nama kota
+const getCityCoordinates = async () => {
+    const cityName = cityInput.value.trim();
+    if (!cityName) return alert("Please enter a city name!");
+
+    try {
+        const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${API_KEY}`);
+        const data = await response.json();
+
+        if (data.length === 0) {
+            return alert(`No coordinates found for "${cityName}"`);
+        }
+
         const { name, lat, lon } = data[0];
         getWeatherDetails(name, lat, lon);
-    }).catch(() => {
-        alert("An error occured while fetching the coordinates!");
-    });
-} 
+        
+        
+    } catch (error) {
+        alert("An error occurred while fetching the coordinates!");
+        console.error(error);
+    }
+};
 
+// Fungsi untuk mendapatkan koordinat pengguna dan mengonversinya ke nama kota
 const getUserCoordinates = () => {
     navigator.geolocation.getCurrentPosition(
-        position => {
-            const { latitude, longitude } = position.coords; // get coordinates of user location
-            const REVERSE_GEOCODING_URL = `http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`;
+        async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+                const response = await fetch(`http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${API_KEY}`);
+                const data = await response.json();
 
-            // get city name from coordinates using reverse geocoding API
-            fetch(REVERSE_GEOCODING_URL).then(res => res.json()).then(data => {
+                if (data.length === 0) {
+                    return alert("Could not find your location!");
+                }
+
                 const { name } = data[0];
                 getWeatherDetails(name, latitude, longitude);
-            }).catch(() => {
-                alert("An error occured while fetching the city!");
-            });
-        }, 
-        error => {
-            if(error.code === error.PERMISSION_DENIED) {
-                alert("Geolocation request denied. Please reset location permission to grant access again.");
+
+                // Kosongkan kolom input setelah pencarian berhasil
+                cityInput.value = "";
+            } catch (error) {
+                alert("An error occurred while fetching the city!");
+                console.error(error);
+            }
+        },
+        (error) => {
+            if (error.code === error.PERMISSION_DENIED) {
+                alert("Geolocation request denied. Please allow location access to use this feature.");
+            } else {
+                alert("Unable to retrieve your location. Please try again.");
             }
         }
     );
-}
+};
 
+// Event listener untuk tombol pencarian dan input
 locationButton.addEventListener("click", getUserCoordinates);
 searchButton.addEventListener("click", getCityCoordinates);
-cityInput.addEventListener("keyup", e => e.key === "Enter" && getCityCoordinates());
+cityInput.addEventListener("keyup", (e) => e.key === "Enter" && getCityCoordinates());
+
+// Event listener untuk dropdown suhu
+unitToggle.addEventListener("change", () => {
+    currentUnit = unitToggle.value;
+    const cityName = document.querySelector(".current-weather .details h2")?.innerText.split(" (")[0];
+    if (cityName) getCityCoordinates();
+});
