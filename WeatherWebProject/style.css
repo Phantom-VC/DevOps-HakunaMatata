@@ -117,6 +117,28 @@ h1{
     margin: 5px 0 -12px 0;
 }
 
+.day-theme {
+    background-color: #fff7b0;
+    color: #000;
+}
+
+.night-theme {
+    background-color: #0D1B2A;
+    color: #fff;
+}
+
+.night-theme .weather-input button {
+    background: #1D3557;
+}
+
+.night-theme .weather-input .location-btn {
+    background: #6C757D;
+}
+
+.night-theme .current-weather, .night-theme .weather-cards .card {
+    background: #1D3557;
+}
+
 @media(max-width: 1400px){
     .weather-data .current-weather {
         padding: 20px;
