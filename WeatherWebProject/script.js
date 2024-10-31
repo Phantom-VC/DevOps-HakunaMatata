@@ -173,3 +173,20 @@ unitToggle.addEventListener("change", () => {
     const cityName = document.querySelector(".current-weather .details h2")?.innerText.split(" (")[0];
     if (cityName) getCityCoordinates();
 });
+
+// Fungsi untuk toggle tema secara manual
+const toggleTheme = () => {
+    const body = document.body;
+    if (body.classList.contains("day-theme")) {
+        body.classList.replace("day-theme", "night-theme");
+    } else if (body.classList.contains("night-theme")) {
+        body.classList.replace("night-theme", "day-theme");
+    } else {
+        // Jika belum ada tema, tambahkan tema malam sebagai default
+        body.classList.add("night-theme");
+    }
+};
+
+// Event listener untuk tombol toggle tema
+const themeToggleButton = document.querySelector(".theme-toggle-btn");
+themeToggleButton.addEventListener("click", toggleTheme);
