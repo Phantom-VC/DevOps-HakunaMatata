@@ -68,8 +68,7 @@ const getWeatherDetails = async (cityName, lat, lon) => {
     try {
         const response = await fetch(`http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}`);
         const data = await response.json();
-
-    fetch(WEATHER_API_URL).then(res => res.json()).then(data => {
+        
         const cityTimezone = data.city.timezone; // Timezone offset in seconds
         const sunrise = new Date((data.city.sunrise + cityTimezone) * 1000).getTime();
         const sunset = new Date((data.city.sunset + cityTimezone) * 1000).getTime();
@@ -78,13 +77,9 @@ const getWeatherDetails = async (cityName, lat, lon) => {
         // Apply the theme based on day or night
         applyThemeBasedOnTime(sunrise, sunset, currentTime);
 
-        // filter the forecasts to get only one forecast per day
-        const uniqueForecastDays = [];
-        const fiveDaysForecast = data.list.filter(forecast => {
-
+        // Filter the forecasts to get only one forecast per day
         const uniqueDays = [];
         const fiveDaysForecast = data.list.filter((forecast) => {
-
             const forecastDate = new Date(forecast.dt_txt).getDate();
             if (!uniqueDays.includes(forecastDate)) {
                 uniqueDays.push(forecastDate);
@@ -116,7 +111,6 @@ const getCityCoordinates = async () => {
         const { name, lat, lon } = data[0];
         getWeatherDetails(name, lat, lon);
         
-        
     } catch (error) {
         alert("An error occurred while fetching the coordinates!");
         console.error(error);
@@ -139,8 +133,7 @@ const getUserCoordinates = () => {
                 const { name } = data[0];
                 getWeatherDetails(name, latitude, longitude);
 
-                // Kosongkan kolom input setelah pencarian berhasil
-                cityInput.value = "";
+                cityInput.value = ""; // Kosongkan kolom input setelah pencarian berhasil
             } catch (error) {
                 alert("An error occurred while fetching the city!");
                 console.error(error);
