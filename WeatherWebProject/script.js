@@ -33,6 +33,14 @@ const getWeatherDetails = (cityName, lat, lon) => {
     const WEATHER_API_URL = `http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}`; 
 
     fetch(WEATHER_API_URL).then(res => res.json()).then(data => {
+        const cityTimezone = data.city.timezone; // Timezone offset in seconds
+        const sunrise = new Date((data.city.sunrise + cityTimezone) * 1000).getTime();
+        const sunset = new Date((data.city.sunset + cityTimezone) * 1000).getTime();
+        const currentTime = new Date().getTime();
+
+        // Apply the theme based on day or night
+        applyThemeBasedOnTime(sunrise, sunset, currentTime);
+
         // filter the forecasts to get only one forecast per day
         const uniqueForecastDays = [];
         const fiveDaysForecast = data.list.filter(forecast => {
@@ -96,6 +104,19 @@ const getUserCoordinates = () => {
         }
     );
 }
+
+const applyThemeBasedOnTime = (sunrise, sunset, currentTime) => {
+    const body = document.body;
+    
+    // Clear any existing theme
+    body.classList.remove("day-theme", "night-theme");
+    
+    if (currentTime >= sunrise && currentTime < sunset) {
+        body.classList.add("day-theme");
+    } else {
+        body.classList.add("night-theme");
+    }
+};
 
 locationButton.addEventListener("click", getUserCoordinates);
 searchButton.addEventListener("click", getCityCoordinates);
