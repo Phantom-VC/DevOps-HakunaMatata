@@ -3,13 +3,13 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main           
-      - marcelino      
-      - Mario          
-      - calvin         
+      - main
+      - marcelino
+      - Mario
+      - Calvin
   pull_request:
     branches:
-      - main           
+      - main
 
 jobs:
   build:
