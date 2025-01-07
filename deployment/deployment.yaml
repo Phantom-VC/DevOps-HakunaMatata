@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weatherweb-deployment
+spec:
+  replicas: 2  
+  selector:
+    matchLabels:
+      app: weatherweb
+  template:
+    metadata:
+      labels:
+        app: weatherweb
+    spec:
+      containers:
+      - name: weatherweb-container
+        image: marcelino30/weatherwebproject:latest 
+        ports:
+        - containerPort: 80

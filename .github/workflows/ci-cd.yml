@@ -34,3 +34,12 @@ jobs:
       - name: Verify Nginx is running
         run: |
           curl -I http://localhost:8080 | grep "200 OK"
+
+      # Build Docker image
+      - name: Build Docker image
+        run: docker build -t marcelino30/weatherwebproject:latest .
+
+      # Push Docker image to Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: docker push marcelino30/weatherwebproject:latest
+
