@@ -17,3 +17,6 @@ spec:
         image: marcelino30/weatherwebproject:latest 
         ports:
         - containerPort: 80
+      - name: sidecar-container
+        image: busybox
+        args: ["sh", "-c", "while true; do echo 'Sidecar container is running'; sleep 10; done"]
